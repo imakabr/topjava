@@ -21,7 +21,7 @@ public class UserMealsUtil {
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500),
                 new UserMeal(LocalDateTime.of(2015, Month.MAY, 31, 20, 0), "Ужин", 510)
         );
-        getFilteredWithExceeded(mealList, LocalTime.of(7, 0), LocalTime.of(12, 0), 2000);
+        getFilteredWithExceededOptional(mealList, LocalTime.of(7, 0), LocalTime.of(11, 0), 2000);
     }
 
     public static List<UserMealWithExceed> getFilteredWithExceededOptional(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
@@ -41,25 +41,23 @@ public class UserMealsUtil {
     public static List<UserMealWithExceed> getFilteredWithExceeded(List<UserMeal> mealList, LocalTime startTime, LocalTime endTime, int caloriesPerDay) {
 
         Map<LocalDate, Integer> countCalories = new HashMap<>();
-        List<UserMeal> cache = new ArrayList<>();
-        List<UserMealWithExceed> list = new ArrayList<>();
         for (UserMeal userMeal : mealList) {
             LocalDate date = userMeal.getDateTime().toLocalDate();
-            LocalTime time = userMeal.getDateTime().toLocalTime();
             int calories = userMeal.getCalories();
             countCalories.put(date, countCalories.getOrDefault(date, 0) + calories);
+        }
+        List<UserMealWithExceed> listUserMealWithExceed = new ArrayList<>();
+        for (UserMeal userMeal : mealList) {
+            LocalDateTime dateTime = userMeal.getDateTime();
+            LocalTime time = dateTime.toLocalTime();
             if (TimeUtil.isBetween(time, startTime, endTime)) {
-                cache.add(userMeal);
+                LocalDate date = dateTime.toLocalDate();
+                String description = userMeal.getDescription();
+                int calories = userMeal.getCalories();
+                boolean exceed = countCalories.get(date) > caloriesPerDay;
+                listUserMealWithExceed.add(new UserMealWithExceed(dateTime, description, calories, exceed));
             }
         }
-        for (UserMeal userMeal : cache) {
-            LocalDateTime dateTime = userMeal.getDateTime();
-            LocalDate date = dateTime.toLocalDate();
-            String description = userMeal.getDescription();
-            int calories = userMeal.getCalories();
-            boolean exceed = countCalories.get(date) > caloriesPerDay;
-            list.add(new UserMealWithExceed(dateTime, description, calories, exceed));
-        }
-        return list;
+        return listUserMealWithExceed;
     }
 }
