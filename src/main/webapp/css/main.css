@@ -94,4 +94,5 @@ td:last-child {
   direction: ltr;
   -webkit-font-feature-settings: 'liga';
   -webkit-font-smoothing: antialiased;
+  text-decoration: none; /* Отменяем подчеркивание у ссылки */
 }

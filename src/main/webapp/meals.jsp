@@ -36,8 +36,9 @@
             <fmt:formatDate pattern="dd.MM.yyyy HH:mm" value="${ parsedDateTime }" /> </td>
             <td>${color}<c:out value="${meal.description}" /></td>
             <td>${color}<c:out value="${meal.calories}" /></td>
-            <td>  <i class="material-icons button edit">edit</i></td>
-            <td>  <i class="material-icons button delete">delete</i></td>
+<%--            <a href="UserController?action=edit&userId=<c:out value="${user.userid}"/>">Update</a>--%>
+            <td>  <a class="material-icons button edit" href="UserController?action=edit&userId=<c:out value="${user.userid}"/>" text-decoration="none">edit</a></td>
+            <td>  <a class="material-icons button delete" href="meals?action=delete&mealId=<c:out value="${meal.id}"/>" text-decoration="none">delete</a></td>
             <td>  <i class="material-icons button add">add</i></td>
 
 <%--            <td><fmt:formatDate pattern="yyyy-MMM-dd" value="${meals.dob}" /></td>--%>
