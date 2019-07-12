@@ -30,7 +30,9 @@ public class Meal {
         return id;
     }
 
-    public LocalDateTime getDateTime() { return dateTime; }
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 
     public String getDescription() {
         return description;

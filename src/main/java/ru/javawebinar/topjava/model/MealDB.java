@@ -10,46 +10,59 @@ import java.util.Collections;
 import java.util.List;
 
 public class MealDB {
-    private static int idMeal = 0;
+    private volatile static int idMeal = 0;
 
-    private static List<Meal> meals = create();
+    private final static List<Meal> meals;
 
-    public static List<Meal> getAll() {
-        return meals;
-    }
-
-    public static void add(Meal meal) {
-        meals.add(meal.setId(idMeal++));
-    }
-
-    public static void delete(int id) {
-        meals.remove(id);
-        idMeal = id;
-        for (int i = id; i < meals.size(); i++) {
-            meals.get(i).setId(idMeal++);
-        }
-    }
-
-    public static void update(Meal meal) {
-        int id = meal.getId();
-        meals.set(id, meal);
-    }
-
-    public static Meal get(int id) {
-        return meals.get(id);
-    }
-
-    private MealDB() {
-    }
-
-    private static List<Meal> create() {
-        meals = new ArrayList<>();
+    static {
+        meals = Collections.synchronizedList(new ArrayList<>());
         add(new Meal(LocalDateTime.of(2015, Month.MAY, 30, 10, 0), "Завтрак", 500));
         add(new Meal(LocalDateTime.of(2015, Month.MAY, 30, 13, 0), "Обед", 1000));
         add(new Meal(LocalDateTime.of(2015, Month.MAY, 30, 20, 0), "Ужин", 500));
         add(new Meal(LocalDateTime.of(2015, Month.MAY, 31, 11, 0), "Завтрак", 1000));
         add(new Meal(LocalDateTime.of(2015, Month.MAY, 31, 13, 0), "Обед", 500));
         add(new Meal(LocalDateTime.of(2015, Month.MAY, 31, 21, 0), "Ужин", 510));
-        return Collections.synchronizedList(meals);
+        add(new Meal(LocalDateTime.of(2015, Month.JUNE, 01, 12, 25), "Завтрак", 300));
+        add(new Meal(LocalDateTime.of(2015, Month.JUNE, 01, 14, 34), "Обед", 1100));
+        add(new Meal(LocalDateTime.of(2015, Month.JUNE, 2, 13, 15), "Обед", 2300));
     }
+
+    public static List<Meal> getAll() {
+        synchronized (meals) {
+            return meals;
+        }
+    }
+
+    public static void add(Meal meal) {
+        synchronized (meals) {
+            meals.add(meal.setId(idMeal++));
+        }
+    }
+
+    public static void delete(int id) {
+        synchronized (meals) {
+            meals.remove(id);
+            idMeal = id;
+            for (int i = id; i < meals.size(); i++) {
+                meals.get(i).setId(idMeal++);
+            }
+        }
+    }
+
+    public static void update(Meal meal) {
+        synchronized (meals) {
+            int id = meal.getId();
+            meals.set(id, meal);
+        }
+    }
+
+    public static Meal get(int id) {
+        synchronized (meals) {
+            return meals.get(id);
+        }
+    }
+
+    private MealDB() {
+    }
+
 }

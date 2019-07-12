@@ -46,7 +46,6 @@ public class MealServlet extends HttpServlet {
             log.debug("doGet to /meals.jsp");
             request.getRequestDispatcher("/meals.jsp").forward(request, response);
         }
-
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -55,11 +54,11 @@ public class MealServlet extends HttpServlet {
         String description = request.getParameter("description");
         int calories = Integer.parseInt(request.getParameter("calories"));
         Meal meal = new Meal(dateTime, description, calories);
-        String userid = request.getParameter("userid");
-        if (userid == null || userid.isEmpty()) {
+        String mealId = request.getParameter("mealId");
+        if (mealId == null || mealId.isEmpty()) {
             dao.add(meal);
         } else {
-            meal.setId(Integer.parseInt(userid));
+            meal.setId(Integer.parseInt(mealId));
             dao.update(meal);
         }
         List<MealTo> listMealTo = MealsUtil.getFilteredWithExcess(dao.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);

@@ -11,7 +11,7 @@
 
 <form method="POST" action='meals' name="frmAddUser">
     <%--    Meal ID : --%>
-    <input type="hidden" readonly="readonly" name="userid"
+    <input type="hidden" readonly="readonly" name="mealId"
            value="<c:out value="${meal.id}" />"/> <br/>
     Date : <input
         type="datetime-local" name="dateTime"
