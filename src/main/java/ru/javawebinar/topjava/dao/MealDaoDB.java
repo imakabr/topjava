@@ -5,7 +5,7 @@ import ru.javawebinar.topjava.model.MealDB;
 
 import java.util.List;
 
-public class MealDao implements Dao<Meal> {
+public class MealDaoDB implements Dao<Meal> {
     @Override
     public void add(Meal meal) {
         MealDB.add(meal);
@@ -18,16 +18,16 @@ public class MealDao implements Dao<Meal> {
 
     @Override
     public void update(Meal meal) {
-
+        MealDB.update(meal);
     }
 
     @Override
     public List<Meal> getAll() {
-        return MealDB.getMeals();
+        return MealDB.getAll();
     }
 
     @Override
     public Meal getById(int mealId) {
-        return null;
+        return MealDB.get(mealId);
     }
 }
