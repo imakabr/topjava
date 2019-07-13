@@ -2,7 +2,7 @@ package ru.javawebinar.topjava.web;
 
 import org.slf4j.Logger;
 import ru.javawebinar.topjava.dao.Dao;
-import ru.javawebinar.topjava.dao.MealDaoDB;
+import ru.javawebinar.topjava.dao.MealDao;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.MealTo;
 import ru.javawebinar.topjava.util.MealsUtil;
@@ -21,25 +21,31 @@ import static org.slf4j.LoggerFactory.getLogger;
 
 public class MealServlet extends HttpServlet {
     private static final Logger log = getLogger(UserServlet.class);
-    private final Dao<Meal> dao = new MealDaoDB();
+    private final Dao<Meal> dao = new MealDao();
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String action = request.getParameter("action");
-
-        if (action != null && action.equalsIgnoreCase("delete")) {
-            int mealId = Integer.parseInt(request.getParameter("mealId"));
-            dao.delete(mealId);
-            response.sendRedirect("meals");
-        } else if (action != null && action.equalsIgnoreCase("edit")) {
-            int mealId = Integer.parseInt(request.getParameter("mealId"));
-            Meal meal = dao.getById(mealId);
-            request.setAttribute("meal", meal);
-            request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
-        } else if (action != null && action.equalsIgnoreCase("add")) {
-            request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
+        if (action != null) {
+            switch (action) {
+                case "delete":
+                    int mealId = Integer.parseInt(request.getParameter("mealId"));
+                    dao.delete(mealId);
+                    response.sendRedirect("meals");
+                    break;
+                case "edit":
+                    mealId = Integer.parseInt(request.getParameter("mealId"));
+                    Meal meal = dao.getById(mealId);
+                    request.setAttribute("meal", meal);
+                    request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
+                    break;
+                case "add":
+                    request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
+                    break;
+                default:
+            }
         } else {
             List<MealTo> listMealTo = MealsUtil.getFilteredWithExcess(dao.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
             request.setAttribute("meals", listMealTo);
@@ -48,7 +54,7 @@ public class MealServlet extends HttpServlet {
         }
     }
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         request.setCharacterEncoding("UTF-8");
         LocalDateTime dateTime = LocalDateTime.parse(request.getParameter("dateTime"), dateTimeFormatter);
         String description = request.getParameter("description");
@@ -61,9 +67,7 @@ public class MealServlet extends HttpServlet {
             meal.setId(Integer.parseInt(mealId));
             dao.update(meal);
         }
-        List<MealTo> listMealTo = MealsUtil.getFilteredWithExcess(dao.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
-        request.setAttribute("meals", listMealTo);
-        log.debug("doPost to /meals.jsp");
-        request.getRequestDispatcher("/meals.jsp").forward(request, response);
+        log.debug("doPost redirect to /meals.jsp");
+        response.sendRedirect("meals");
     }
 }
