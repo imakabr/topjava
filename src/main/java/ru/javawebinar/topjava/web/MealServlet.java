@@ -28,29 +28,25 @@ public class MealServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 
         String action = request.getParameter("action");
-        if (action != null) {
-            switch (action) {
-                case "delete":
-                    int mealId = Integer.parseInt(request.getParameter("mealId"));
-                    dao.delete(mealId);
-                    response.sendRedirect("meals");
-                    break;
-                case "edit":
-                    mealId = Integer.parseInt(request.getParameter("mealId"));
-                    Meal meal = dao.getById(mealId);
-                    request.setAttribute("meal", meal);
-                    request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
-                    break;
-                case "add":
-                    request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
-                    break;
-                default:
-            }
-        } else {
-            List<MealTo> listMealTo = MealsUtil.getFilteredWithExcess(dao.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
-            request.setAttribute("meals", listMealTo);
-            log.debug("doGet to /meals.jsp");
-            request.getRequestDispatcher("/meals.jsp").forward(request, response);
+
+        switch (action != null ? action : "all") {
+            case "delete":
+                int mealId = Integer.parseInt(request.getParameter("mealId"));
+                dao.delete(mealId);
+                response.sendRedirect("meals");
+                break;
+            case "edit":
+                mealId = Integer.parseInt(request.getParameter("mealId"));
+                Meal meal = dao.getById(mealId);
+                request.setAttribute("meal", meal);
+            case "add":
+                request.getRequestDispatcher("/mealEdit.jsp").forward(request, response);
+                break;
+            default:
+                List<MealTo> listMealTo = MealsUtil.getFilteredWithExcess(dao.getAll(), LocalTime.MIN, LocalTime.MAX, 2000);
+                request.setAttribute("meals", listMealTo);
+                log.debug("doGet to /meals.jsp");
+                request.getRequestDispatcher("/meals.jsp").forward(request, response);
         }
     }
 

@@ -40,7 +40,7 @@ public class MealDao implements Dao<Meal> {
     }
 
     @Override
-    public Meal add(Meal meal) {
+    public synchronized Meal add(Meal meal) {
         meal.setId(idMeal.get());
         return meals.put(idMeal.getAndIncrement(), meal);
     }
