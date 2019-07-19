@@ -10,37 +10,41 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class InMemoryMealRepositoryImpl implements MealRepository {
-    private Map<Integer, Meal> repository = new ConcurrentHashMap<>();
+    private Map<Integer, Map<Integer, Meal>> repository = new ConcurrentHashMap<>();
     private AtomicInteger counter = new AtomicInteger(0);
 
     {
-        MealsUtil.MEALS.forEach(this::save);
+        MealsUtil.MEALS.forEach(x -> save(x, 0));
     }
 
     @Override
-    public Meal save(Meal meal) {
+    public Meal save(Meal meal, Integer userId) {
+        Map<Integer, Meal> userRepo = repository.computeIfAbsent(userId, val -> new ConcurrentHashMap<>());
         if (meal.isNew()) {
             meal.setId(counter.incrementAndGet());
-            repository.put(meal.getId(), meal);
+            userRepo.put(meal.getId(), meal);
             return meal;
         }
         // treat case: update, but absent in storage
-        return repository.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
+        return userRepo.computeIfPresent(meal.getId(), (id, oldMeal) -> meal);
     }
 
     @Override
-    public boolean delete(int id) {
-        return repository.remove(id) != null;
+    public boolean delete(int mealId, Integer userId) {
+        Map<Integer, Meal> userRepo = repository.computeIfAbsent(userId, val -> new ConcurrentHashMap<>());
+        return userRepo.remove(mealId) != null;
     }
 
     @Override
-    public Meal get(int id) {
-        return repository.get(id);
+    public Meal get(int mealId, Integer userId) {
+        Map<Integer, Meal> userRepo = repository.computeIfAbsent(userId, val -> new ConcurrentHashMap<>());
+        return userRepo.get(mealId);
     }
 
     @Override
-    public Collection<Meal> getAll() {
-        return repository.values();
+    public Collection<Meal> getAll(Integer userId) {
+        Map<Integer, Meal> userRepo = repository.computeIfAbsent(userId, val -> new ConcurrentHashMap<>());
+        return userRepo.values();
     }
 }
 
