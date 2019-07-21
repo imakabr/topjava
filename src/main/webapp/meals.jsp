@@ -1,7 +1,10 @@
+<%@ page import="java.time.LocalTime" %>
+<%@ page import="java.time.LocalDate" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="fn" uri="http://topjava.javawebinar.ru/functions" %>
+
 <%--<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions"%>--%>
 <html>
 <head>
@@ -21,8 +24,41 @@
     <h3><a href="index.html">Home</a></h3>
     <hr/>
     <h2>Meals</h2>
+
+    <div>
+        <div>
+            <form method="post" action="meals">
+                <div>
+                    <input type="hidden" name="filter">
+                    <div>
+                        <label>От даты</label>
+                        <input type="date" name="startDate" value="0001-01-01">
+                    </div>
+                    <div>
+                        <label>До даты</label>
+                        <input type="date" name="endDate" value="<%=LocalDate.now()%>">
+                    </div>
+                    <div>
+                        <label>От времени</label>
+
+                        <input type="time" name="startTime" value="<%=LocalTime.MIN%>">
+                    </div>
+                    <div>
+                        <label>До времени</label>
+                        <input type="time" name="endTime" value="23:59">
+                    </div>
+                </div>
+                <div>
+                    <button type="reset">Отменить</button>
+                    <button type="submit">Отфильтровать</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <br><br>
     <a href="meals?action=create">Add Meal</a>
     <br><br>
+
     <table border="1" cellpadding="8" cellspacing="0">
         <thead>
         <tr>
