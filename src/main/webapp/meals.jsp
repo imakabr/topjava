@@ -32,20 +32,20 @@
                     <input type="hidden" name="filter">
                     <div>
                         <label>От даты</label>
-                        <input type="date" name="startDate" value="0001-01-01">
+                        <input type="date" name="startDate" value="">
                     </div>
                     <div>
                         <label>До даты</label>
-                        <input type="date" name="endDate" value="<%=LocalDate.now()%>">
+                        <input type="date" name="endDate" value="">
                     </div>
                     <div>
                         <label>От времени</label>
 
-                        <input type="time" name="startTime" value="<%=LocalTime.MIN%>">
+                        <input type="time" name="startTime" value="">
                     </div>
                     <div>
                         <label>До времени</label>
-                        <input type="time" name="endTime" value="23:59">
+                        <input type="time" name="endTime" value="">
                     </div>
                 </div>
                 <div>

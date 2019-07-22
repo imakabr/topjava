@@ -27,14 +27,12 @@ public class MealServlet extends HttpServlet {
 
     private ConfigurableApplicationContext appCtx;
     private MealRestController mealRestController;
-    private ProfileRestController profileRestController;
 
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         appCtx = new ClassPathXmlApplicationContext("spring/spring-app.xml");
         mealRestController = appCtx.getBean(MealRestController.class);
-        profileRestController = appCtx.getBean(ProfileRestController.class);
     }
 
     @Override
@@ -47,25 +45,32 @@ public class MealServlet extends HttpServlet {
         request.setCharacterEncoding("UTF-8");
         if (request.getParameter("filter") != null) {
             log.info("filter");
+            String startDate = request.getParameter("startDate");
+            String startTime = request.getParameter("startTime");
+            String endDate = request.getParameter("endDate");
+            String endTime = request.getParameter("endTime");
             List<MealTo> mealsTo = mealRestController.getFilteredByDates(
-                    LocalDate.parse(request.getParameter("startDate")),
-                    LocalTime.parse(request.getParameter("startTime")),
-                    LocalDate.parse(request.getParameter("endDate")),
-                    LocalTime.parse(request.getParameter("endTime"))
+                    startDate.isEmpty() ? null : LocalDate.parse(startDate),
+                    startTime.isEmpty() ? null : LocalTime.parse(startTime),
+                    endDate.isEmpty() ? null : LocalDate.parse(endDate),
+                    endTime.isEmpty() ? null : LocalTime.parse(endTime)
             );
             request.setAttribute("meals", mealsTo);
             request.getRequestDispatcher("/meals.jsp").forward(request, response);
 
         } else {
             String id = request.getParameter("id");
-
             Meal meal = new Meal(id.isEmpty() ? null : Integer.valueOf(id),
                     LocalDateTime.parse(request.getParameter("dateTime")),
                     request.getParameter("description"),
                     Integer.parseInt(request.getParameter("calories")));
-
-            log.info(meal.isNew() ? "Create {}" : "Update {}", meal);
-            mealRestController.update(meal, profileRestController.get().getId());
+            if (meal.isNew()) {
+                log.info("Create {}", meal);
+                mealRestController.create(meal);
+            } else {
+                log.info("Update {}", meal);
+                mealRestController.update(meal, Integer.valueOf(id));
+            }
             response.sendRedirect("meals");
         }
     }

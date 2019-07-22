@@ -14,6 +14,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
+import static ru.javawebinar.topjava.util.ValidationUtil.assureIdConsistent;
 import static ru.javawebinar.topjava.util.ValidationUtil.checkNew;
 
 @Controller
@@ -36,6 +37,10 @@ public class MealRestController {
     }
 
     public List<MealTo> getFilteredByDates (LocalDate startDate, LocalTime startTime, LocalDate endDate,  LocalTime endTime) {
+        startDate = (startDate == null) ? LocalDate.MIN : startDate;
+        startTime = (startTime == null) ? LocalTime.MIN : startTime;
+        endDate = (endDate == null) ? LocalDate.now() : endDate;
+        endTime = (endTime == null) ? LocalTime.MAX : endTime;
         log.info("getFilteredByDates");
         return MealsUtil.getFilteredWithExcess(
                 service.getFilteredByDates(SecurityUtil.authUserId(), startDate, endDate),
@@ -62,6 +67,7 @@ public class MealRestController {
 
     public void update(Meal meal, int id) {
         log.info("update {} with id={}", meal, id);
-        service.update(meal, id);
+        assureIdConsistent(meal, id);
+        service.update(meal, SecurityUtil.authUserId());
     }
 }

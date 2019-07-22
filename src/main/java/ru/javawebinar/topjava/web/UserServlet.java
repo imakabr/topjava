@@ -16,16 +16,8 @@ public class UserServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("user");
-        switch (action == null ? "all" : action) {
-            case "1":
-                SecurityUtil.setAuthUserId(Integer.parseInt(action));
-                break;
-            case "2":
-                SecurityUtil.setAuthUserId(Integer.parseInt(action));
-                break;
-            case "all":
-            default:
-                break;
+        if (action != null) {
+            SecurityUtil.setAuthUserId(Integer.parseInt(action));
         }
         log.debug("forward to users");
         request.setAttribute("user", SecurityUtil.authUserId());

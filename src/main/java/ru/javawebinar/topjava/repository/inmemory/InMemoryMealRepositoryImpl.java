@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 @Repository
 public class InMemoryMealRepositoryImpl implements MealRepository {
@@ -53,15 +54,19 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public Collection<Meal> getAll(Integer userId) {
-        return getFilteredByDates(userId, LocalDate.MIN, LocalDate.MAX);
+        return getFiltered(userId, meal -> DateTimeUtil.isBetween(meal.getDate(), LocalDate.MIN, LocalDate.MAX));
     }
 
     @Override
     public Collection<Meal> getFilteredByDates(Integer userId, LocalDate startDate, LocalDate endDate) {
+        return getFiltered(userId, meal -> DateTimeUtil.isBetween(meal.getDate(), startDate, endDate));
+    }
+
+    private Collection<Meal> getFiltered(Integer userId, Predicate<Meal> filter) {
         Map<Integer, Meal> userRepo = getRepo(userId);
         return userRepo.values()
                 .stream()
-                .filter(meal -> DateTimeUtil.isBetween(meal.getDate(), startDate, endDate))
+                .filter(filter)
                 .sorted(Comparator.comparing(Meal::getDateTime).reversed())
                 .collect(Collectors.toList());
     }
