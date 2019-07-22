@@ -54,7 +54,7 @@ public class InMemoryMealRepositoryImpl implements MealRepository {
 
     @Override
     public Collection<Meal> getAll(Integer userId) {
-        return getFiltered(userId, meal -> DateTimeUtil.isBetween(meal.getDate(), LocalDate.MIN, LocalDate.MAX));
+        return getFiltered(userId, filter -> true);
     }
 
     @Override
