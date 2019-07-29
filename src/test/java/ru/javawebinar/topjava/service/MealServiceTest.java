@@ -8,24 +8,22 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlConfig;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.javawebinar.topjava.MealTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
-
-import static ru.javawebinar.topjava.MealTestData.USER_ID;
-import static ru.javawebinar.topjava.MealTestData.START_SEQ_MEAL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static ru.javawebinar.topjava.MealTestData.*;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
+        "classpath:spring/spring-app-jdbc.xml",
         "classpath:spring/spring-db.xml"
 })
 @RunWith(SpringRunner.class)
@@ -44,16 +42,13 @@ public class MealServiceTest {
     @Test
     public void get() {
         Meal actual = service.get(START_SEQ_MEAL, USER_ID);
-        Meal expected = MealTestData.MEALS.get(0);
+        Meal expected = meal_1;
         assertThat(actual).isEqualToComparingFieldByField(expected);
     }
 
     @Test
     public void delete() {
-        List<Meal> meals = service.getAll(USER_ID);
-        meals = meals.stream()
-                .filter(x -> x.getId() != START_SEQ_MEAL)
-                .collect(Collectors.toList());
+        List<Meal> meals = Arrays.asList(meal_6, meal_5, meal_4, meal_3, meal_2);
         service.delete(START_SEQ_MEAL, USER_ID);
         assertThat(meals).usingFieldByFieldElementComparator().isEqualTo(service.getAll(USER_ID));
     }
@@ -61,21 +56,21 @@ public class MealServiceTest {
     @Test
     public void getBetweenDates() {
         List<Meal> actual = service.getBetweenDates(LocalDate.of(2015, Month.MAY, 30), LocalDate.of(2015, Month.MAY, 30), USER_ID);
-        List<Meal> expected = MealTestData.getBetweenDates(LocalDate.of(2015, Month.MAY, 30), LocalDate.of(2015, Month.MAY, 30));
+        List<Meal> expected = Arrays.asList(meal_3, meal_2, meal_1);
         assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
     }
 
     @Test
     public void getBetweenDateTimes() {
         List<Meal> actual = service.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 12, 0), LocalDateTime.of(2015, Month.MAY, 30, 15, 0), USER_ID);
-        List<Meal> expected = MealTestData.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 12, 0), LocalDateTime.of(2015, Month.MAY, 30, 15, 0));
+        List<Meal> expected = Arrays.asList(meal_2);
         assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
     }
 
     @Test
     public void getAll() {
         List<Meal> actual = service.getAll(USER_ID);
-        List<Meal> expected = MealTestData.getSortedMeals();
+        List<Meal> expected = Arrays.asList(meal_6, meal_5, meal_4, meal_3, meal_2, meal_1);
         assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
     }
 
