@@ -23,7 +23,6 @@ import static ru.javawebinar.topjava.MealTestData.*;
 
 @ContextConfiguration({
         "classpath:spring/spring-app.xml",
-        "classpath:spring/spring-app-jdbc.xml",
         "classpath:spring/spring-db.xml"
 })
 @RunWith(SpringRunner.class)
@@ -43,35 +42,32 @@ public class MealServiceTest {
     public void get() {
         Meal actual = service.get(START_SEQ_MEAL, USER_ID);
         Meal expected = meal_1;
-        assertThat(actual).isEqualToComparingFieldByField(expected);
+        assertMatch(actual, expected);
     }
 
     @Test
     public void delete() {
         List<Meal> meals = Arrays.asList(meal_6, meal_5, meal_4, meal_3, meal_2);
         service.delete(START_SEQ_MEAL, USER_ID);
-        assertThat(meals).usingFieldByFieldElementComparator().isEqualTo(service.getAll(USER_ID));
+        assertMatch(meals, service.getAll(USER_ID));
     }
 
     @Test
     public void getBetweenDates() {
         List<Meal> actual = service.getBetweenDates(LocalDate.of(2015, Month.MAY, 30), LocalDate.of(2015, Month.MAY, 30), USER_ID);
-        List<Meal> expected = Arrays.asList(meal_3, meal_2, meal_1);
-        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
+        assertMatch(actual, meal_3, meal_2, meal_1);
     }
 
     @Test
     public void getBetweenDateTimes() {
         List<Meal> actual = service.getBetweenDateTimes(LocalDateTime.of(2015, Month.MAY, 30, 12, 0), LocalDateTime.of(2015, Month.MAY, 30, 15, 0), USER_ID);
-        List<Meal> expected = Arrays.asList(meal_2);
-        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
+        assertMatch(actual, meal_2);
     }
 
     @Test
     public void getAll() {
         List<Meal> actual = service.getAll(USER_ID);
-        List<Meal> expected = Arrays.asList(meal_6, meal_5, meal_4, meal_3, meal_2, meal_1);
-        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
+        assertMatch(actual, meal_6, meal_5, meal_4, meal_3, meal_2, meal_1);
     }
 
     @Test
@@ -80,14 +76,14 @@ public class MealServiceTest {
         meal.setCalories(666);
         meal.setDescription("Сердце врага");
         service.update(meal, USER_ID);
-        assertThat(meal).isEqualToComparingFieldByField(service.get(START_SEQ_MEAL, USER_ID));
+        assertMatch(meal, service.get(START_SEQ_MEAL, USER_ID));
     }
 
     @Test
     public void create() {
         Meal meal = new Meal(LocalDateTime.of(2019, Month.JULY, 28, 15, 0), "Жирный обед", 1500);
         Meal created = service.create(meal, USER_ID);
-        assertThat(meal).isEqualToComparingFieldByField(service.get(created.getId(), USER_ID));
+        assertMatch(meal, service.get(created.getId(), USER_ID));
     }
 
     @Test(expected = NotFoundException.class)
