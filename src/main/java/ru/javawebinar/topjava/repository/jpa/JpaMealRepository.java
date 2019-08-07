@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.MealRepository;
+import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -28,7 +29,7 @@ public class JpaMealRepository implements MealRepository {
             em.persist(meal);
             return meal;
         } else {
-            return em.merge(meal);
+            return get(meal.getId(), userId) == null ? null : em.merge(meal);
         }
     }
 
@@ -60,7 +61,7 @@ public class JpaMealRepository implements MealRepository {
 
     @Override
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
-        return em.createNamedQuery(Meal.ALL_SORTED, Meal.class)
+        return em.createNamedQuery(Meal.BETWEEN, Meal.class)
                 .setParameter("user_id", userId)
                 .setParameter("startDate", startDate)
                 .setParameter("endDate", endDate)
