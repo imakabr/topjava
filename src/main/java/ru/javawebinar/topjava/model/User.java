@@ -53,9 +53,12 @@ public class User extends AbstractNamedEntity {
     @Range(min = 10, max = 10000)
     private int caloriesPerDay = DEFAULT_CALORIES_PER_DAY;
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-//    @NotNull
-//    private List<Meal> meals;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Meal> meals;
+
+    public List<Meal> getMeals() {
+        return meals;
+    }
 
     public User() {
     }
@@ -66,6 +69,11 @@ public class User extends AbstractNamedEntity {
 
     public User(Integer id, String name, String email, String password, Role role, Role... roles) {
         this(id, name, email, password, DEFAULT_CALORIES_PER_DAY, true, new Date(), EnumSet.of(role, roles));
+    }
+
+    public User(Integer id, String name, String email, String password, List<Meal> meals, Role... roles) {
+        this(id, name, email, password, DEFAULT_CALORIES_PER_DAY, true, new Date(), EnumSet.of(roles[0], roles));
+        this.meals = meals;
     }
 
     public User(Integer id, String name, String email, String password, int caloriesPerDay, boolean enabled, Date registered, Collection<Role> roles) {
