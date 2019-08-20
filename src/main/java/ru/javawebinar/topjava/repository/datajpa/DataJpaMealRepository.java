@@ -2,6 +2,7 @@ package ru.javawebinar.topjava.repository.datajpa;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.model.User;
@@ -18,13 +19,15 @@ public class DataJpaMealRepository implements MealRepository {
     @Autowired
     private CrudMealRepository crudRepository;
 
+    @Autowired
+    private CrudUserRepository crudUserRepository;
+
     @Override
     public Meal save(Meal meal, int userId) {
         if (!meal.isNew() && get(meal.getId(), userId) == null) {
             return null;
         } else {
-            User user = new User();
-            user.setId(userId);
+            User user = crudUserRepository.getOne(userId);
             meal.setUser(user);
             crudRepository.save(meal);
             return meal;
@@ -50,5 +53,10 @@ public class DataJpaMealRepository implements MealRepository {
     @Override
     public List<Meal> getBetween(LocalDateTime startDate, LocalDateTime endDate, int userId) {
         return crudRepository.getBetween(userId, startDate, endDate);
+    }
+
+    @Override
+    public Meal getWithUser(int id) {
+        return crudRepository.getWithUser(id);
     }
 }
