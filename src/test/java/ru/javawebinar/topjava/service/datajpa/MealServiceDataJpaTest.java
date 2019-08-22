@@ -6,8 +6,11 @@ import ru.javawebinar.topjava.Profiles;
 import ru.javawebinar.topjava.UserTestData;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealServiceTest;
+import ru.javawebinar.topjava.util.ValidationUtil;
+import ru.javawebinar.topjava.util.exception.NotFoundException;
 
 import static ru.javawebinar.topjava.MealTestData.*;
+import static ru.javawebinar.topjava.UserTestData.ADMIN_ID;
 
 @ActiveProfiles(Profiles.DATAJPA)
 public class MealServiceDataJpaTest extends MealServiceTest {
@@ -18,4 +21,11 @@ public class MealServiceDataJpaTest extends MealServiceTest {
         assertMatch(actual, ADMIN_MEAL1);
         UserTestData.assertMatch(actual.getUser(), UserTestData.ADMIN);
     }
+
+    @Test
+    public void getNotFound() throws Exception {
+        thrown.expect(NotFoundException.class);
+        ValidationUtil.checkNotFound(service.getWithUser( ADMIN_ID+20), "Meal with User");
+    }
+
 }
