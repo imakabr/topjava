@@ -57,7 +57,7 @@ public class MealService {
         return repository.save(meal, userId);
     }
 
-    public Meal getWithUser(int id) {
-        return repository.getWithUser(id);
+    public Meal getWithUser(int id, int userId) {
+        return checkNotFoundWithId(repository.getWithUser(id, userId), id);
     }
 }

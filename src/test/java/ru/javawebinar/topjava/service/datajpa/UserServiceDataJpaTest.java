@@ -24,6 +24,6 @@ public class UserServiceDataJpaTest extends UserServiceTest {
     @Test
     public void getNotFound() throws Exception {
         thrown.expect(NotFoundException.class);
-        ValidationUtil.checkNotFound(service.getWithMeals( ADMIN_ID+20), "User with Meals");
+        service.getWithMeals(USER_ID+20);
     }
 }
