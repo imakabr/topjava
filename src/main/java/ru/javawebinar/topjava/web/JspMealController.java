@@ -5,11 +5,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
 import ru.javawebinar.topjava.web.meal.MealRestController;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -22,6 +25,7 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @Controller
+@RequestMapping("/meals")
 public class JspMealController {
 
     @Autowired
@@ -30,14 +34,27 @@ public class JspMealController {
     @Autowired
     MealRestController mealRestController;
 
-    @GetMapping(name = "/meals", params={"headers=delete", "id=/*"})
-    public String delete(HttpServletRequest request) {
-        int id = getId(request);
-        mealRestController.delete(id);
-        return "redirect:meals";
+    @GetMapping("/delete/{id}")
+    public String delete(@PathVariable String id) {
+        mealRestController.delete(Integer.parseInt(id));
+        return "redirect:/meals";
     }
 
-    @GetMapping("/meals")
+    @GetMapping("/update/{id}")
+    public String update(@PathVariable String id, Model model) {
+        final Meal meal = mealRestController.get(Integer.parseInt(id));
+        model.addAttribute("meal", meal);
+        return "mealForm";
+    }
+
+    @GetMapping("/create")
+    public String create(Model model) {
+        final Meal meal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
+        model.addAttribute("meal", meal);
+        return "mealForm";
+    }
+
+    @GetMapping()
     public String meals(HttpServletRequest request, Model model) {
         String action = request.getParameter("action");
 
@@ -48,11 +65,11 @@ public class JspMealController {
 //                return "redirect:meals";
             case "create":
             case "update":
-                final Meal meal = "create".equals(action) ?
-                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
-                        mealRestController.get(getId(request));
-                model.addAttribute("meal", meal);
-                return "mealForm";
+//                final Meal meal = "create".equals(action) ?
+//                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
+//                        mealRestController.get(getId(request));
+//                model.addAttribute("meal", meal);
+//                return "mealForm";
             case "filter":
                 LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
                 LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
@@ -67,7 +84,7 @@ public class JspMealController {
             return "meals";
     }
 
-    @PostMapping("/meals")
+    @PostMapping()
     public String setMeal(HttpServletRequest request) throws IOException {
         request.setCharacterEncoding("UTF-8");
         Meal meal = new Meal(
