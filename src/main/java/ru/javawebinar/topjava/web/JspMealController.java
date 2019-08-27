@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.service.MealService;
-import ru.javawebinar.topjava.web.meal.MealRestController;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.time.LocalDate;
@@ -26,23 +24,22 @@ import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
 
 @Controller
 @RequestMapping("/meals")
-public class JspMealController {
+public class JspMealController extends AbstractMealController {
 
     @Autowired
-    private MealService service;
-
-    @Autowired
-    MealRestController mealRestController;
+    public JspMealController(MealService service) {
+        super(service);
+    }
 
     @GetMapping("/delete/{id}")
     public String delete(@PathVariable String id) {
-        mealRestController.delete(Integer.parseInt(id));
+        delete(Integer.parseInt(id));
         return "redirect:/meals";
     }
 
     @GetMapping("/update/{id}")
     public String update(@PathVariable String id, Model model) {
-        final Meal meal = mealRestController.get(Integer.parseInt(id));
+        final Meal meal = get(Integer.parseInt(id));
         model.addAttribute("meal", meal);
         return "mealForm";
     }
@@ -59,27 +56,16 @@ public class JspMealController {
         String action = request.getParameter("action");
 
         switch (action == null ? "all" : action) {
-//            case "delete":
-//                int id = getId(request);
-//                mealRestController.delete(id);
-//                return "redirect:meals";
-            case "create":
-            case "update":
-//                final Meal meal = "create".equals(action) ?
-//                        new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000) :
-//                        mealRestController.get(getId(request));
-//                model.addAttribute("meal", meal);
-//                return "mealForm";
             case "filter":
                 LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
                 LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
                 LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
                 LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
-                model.addAttribute("meals", mealRestController.getBetween(startDate, startTime, endDate, endTime));
+                model.addAttribute("meals", getBetween(startDate, startTime, endDate, endTime));
                 return "meals";
             case "all":
             default:
-                model.addAttribute("meals", mealRestController.getAll());
+                model.addAttribute("meals", getAll());
         }
             return "meals";
     }
@@ -93,9 +79,9 @@ public class JspMealController {
                 Integer.parseInt(request.getParameter("calories")));
 
         if (StringUtils.isEmpty(request.getParameter("id"))) {
-            mealRestController.create(meal);
+            create(meal);
         } else {
-            mealRestController.update(meal, getId(request));
+            update(meal, getId(request));
         }
         return "redirect:meals";
     }
