@@ -24,6 +24,7 @@ public class JdbcUserRepository implements UserRepository {
     private static final BeanPropertyRowMapper<User> USER_ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
     private final RowMapper<Role> ROLE_ROW_MAPPER = (rs, rowNum) -> Role.valueOf(rs.getString("role"));
 
+
     private final JdbcTemplate jdbcTemplate;
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -65,22 +66,40 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public User get(int id) {
-        List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE u.id=?", USER_ROW_MAPPER, id);
-        List<Role> roles = jdbcTemplate.query("SELECT * FROM user_roles ur WHERE ur.user_id=?", ROLE_ROW_MAPPER, id);
-        User user = DataAccessUtils.singleResult(users);
-        user.setRoles(roles);
-        return user;
+            List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE u.id=?", getCustomUserRowMapper(), id);
+            return DataAccessUtils.singleResult(users);
+//        List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE u.id=?", USER_ROW_MAPPER, id);
+//        List<Role> roles = jdbcTemplate.query("SELECT * FROM user_roles ur WHERE ur.user_id=?", ROLE_ROW_MAPPER, id);
+//        User user = DataAccessUtils.singleResult(users);
+//        user.setRoles(roles);
+//        return user;
     }
 
     @Override
     public User getByEmail(String email) {
 //        return jdbcTemplate.queryForObject("SELECT * FROM users WHERE email=?", ROW_MAPPER, email);
-        List<User> users = jdbcTemplate.query("SELECT * FROM users u JOIN user_roles ur on u.id = ur.user_id WHERE email=?", USER_ROW_MAPPER, email);
+        List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE email=?", getCustomUserRowMapper(), email);
         return DataAccessUtils.singleResult(users);
     }
 
     @Override
     public List<User> getAll() {
         return jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", USER_ROW_MAPPER);
+    }
+
+    private RowMapper<User> getCustomUserRowMapper() {
+        return (rs, rowNum) -> {
+            User user = new User();
+            user.setId(rs.getInt("id"));
+            user.setName(rs.getString("name"));
+            user.setEmail(rs.getString("email"));
+            user.setPassword(rs.getString("password"));
+            user.setRegistered(rs.getDate("registered"));
+            user.setEnabled(rs.getBoolean("enabled"));
+            user.setCaloriesPerDay(rs.getInt("calories_per_day"));
+            List<Role> roles = jdbcTemplate.query("SELECT * FROM user_roles ur WHERE ur.user_id=?", ROLE_ROW_MAPPER, user.getId());
+            user.setRoles(roles);
+            return user;
+        };
     }
 }
