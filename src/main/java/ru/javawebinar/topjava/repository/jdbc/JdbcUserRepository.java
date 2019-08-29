@@ -2,6 +2,7 @@ package ru.javawebinar.topjava.repository.jdbc;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.support.DataAccessUtils;
+import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,21 +10,27 @@ import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 import ru.javawebinar.topjava.model.Role;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
 
-import java.sql.ResultSet;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+@Transactional(readOnly = true)
 @Repository
 public class JdbcUserRepository implements UserRepository {
 
     private static final BeanPropertyRowMapper<User> USER_ROW_MAPPER = BeanPropertyRowMapper.newInstance(User.class);
-    private final RowMapper<Role> ROLE_ROW_MAPPER = (rs, rowNum) -> Role.valueOf(rs.getString("role"));
 
+    private final RowMapper<Role> ROLE_ROW_MAPPER = (rs, rowNum) -> Role.valueOf(rs.getString("role"));
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -31,43 +38,76 @@ public class JdbcUserRepository implements UserRepository {
 
     private final SimpleJdbcInsert insertUser;
 
-    private final TransactionTemplate transactionTemplate;
-
     @Autowired
-    public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, TransactionTemplate transactionTemplate) {
+    public JdbcUserRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertUser = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("users")
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.transactionTemplate = transactionTemplate;
     }
 
+    @Transactional
     @Override
     public User save(User user) {
         BeanPropertySqlParameterSource parameterSource = new BeanPropertySqlParameterSource(user);
-
+        List<Role> roles = List.copyOf(user.getRoles());
         if (user.isNew()) {
-            Number newKey = transactionTemplate.execute(ts -> insertUser.executeAndReturnKey(parameterSource));
+            Number newKey = insertUser.executeAndReturnKey(parameterSource);
             user.setId(newKey.intValue());
-        } else if (transactionTemplate.execute(ts -> namedParameterJdbcTemplate.update(
-                "UPDATE users SET name=:name, email=:email, password=:password, " +
-                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource)) == 0) {
+            insertRoles(newKey.intValue(), roles);
+            return user;
+
+        } else if (!updateUser(parameterSource, user.getId(), roles)) {
             return null;
         }
+        deleteRoles(user.getId());
+               insertRoles(user.getId(), roles);
         return user;
     }
 
+    @Transactional
+    public boolean updateUser(BeanPropertySqlParameterSource parameterSource, int id, List<Role> roles) {
+        int count = namedParameterJdbcTemplate.update(
+                "UPDATE users SET name=:name, email=:email, password=:password, " +
+                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource);
+        return count + deleteRoles(id) + insertRoles(id, roles) > 0;
+    }
+
+    @Transactional
+    public int deleteRoles(int id) {
+        return jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", id);
+    }
+
+    @Transactional
+    public int insertRoles(int id, List<Role> roles) {
+        int[] count = jdbcTemplate.batchUpdate(
+                "insert into user_roles (user_id, role) values(?,?)",
+                new BatchPreparedStatementSetter() {
+                    public void setValues(PreparedStatement ps, int i) throws SQLException {
+                        ps.setInt(1, id);
+                        ps.setString(2, roles.get(i).name());
+                    }
+
+                    public int getBatchSize() {
+                        return roles.size();
+                    }
+                }
+        );
+        return IntStream.of(count).sum();
+    }
+
+    @Transactional
     @Override
     public boolean delete(int id) {
-        return transactionTemplate.execute(ts -> jdbcTemplate.update("DELETE FROM users WHERE id=?", id)) != 0;
+        return jdbcTemplate.update("DELETE FROM users WHERE id=?", id) != 0;
     }
 
     @Override
     public User get(int id) {
-            List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE u.id=?", getCustomUserRowMapper(), id);
-            return DataAccessUtils.singleResult(users);
+        List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE u.id=?", getCustomUserRowMapper(), id);
+        return DataAccessUtils.singleResult(users);
 //        List<User> users = jdbcTemplate.query("SELECT * FROM users u WHERE u.id=?", USER_ROW_MAPPER, id);
 //        List<Role> roles = jdbcTemplate.query("SELECT * FROM user_roles ur WHERE ur.user_id=?", ROLE_ROW_MAPPER, id);
 //        User user = DataAccessUtils.singleResult(users);
@@ -84,7 +124,29 @@ public class JdbcUserRepository implements UserRepository {
 
     @Override
     public List<User> getAll() {
-        return jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", USER_ROW_MAPPER);
+        class RoleWrapper {
+            private int id;
+            private Role role;
+
+            private int getId() {
+                return id;
+            }
+
+            private Role getRole() {
+                return role;
+            }
+        }
+        List<RoleWrapper> roles = jdbcTemplate.query("SELECT * FROM user_roles", (rs, rowNum) -> {
+            RoleWrapper roleWrapper = new RoleWrapper();
+            roleWrapper.role = Role.valueOf(rs.getString("role"));
+            roleWrapper.id = rs.getInt("user_id");
+            return roleWrapper;
+        });
+        List<User> users = jdbcTemplate.query("SELECT * FROM users ORDER BY name, email", USER_ROW_MAPPER);
+        Map<Integer, List<Role>> groupingByRoles = roles.stream()
+                .collect(Collectors.groupingBy(RoleWrapper::getId, Collectors.mapping(RoleWrapper::getRole, Collectors.toList())));
+        users.forEach(user -> user.setRoles(groupingByRoles.get(user.getId())));
+        return users;
     }
 
     private RowMapper<User> getCustomUserRowMapper() {

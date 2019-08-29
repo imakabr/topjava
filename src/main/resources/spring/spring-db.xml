@@ -77,6 +77,8 @@
             <property name="transactionManager" ref="transactionManager" />
         </bean>
 
+        <tx:annotation-driven proxy-target-class="true"/>
+
     </beans>
 
     <beans profile="jpa,datajpa">
