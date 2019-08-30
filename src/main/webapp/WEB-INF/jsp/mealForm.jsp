@@ -1,6 +1,8 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+
 
 <html>
 <jsp:include page="fragments/headTag.jsp"/>
@@ -9,7 +11,14 @@
 
 <section>
     <hr>
-<%--    <h2>${param.action == 'create' ? 'Create meal' : 'Edit meal'}</h2>--%>
+    <c:if test="${create == 'create'}">
+        <h2><spring:message code="meal.createMeal"/></h2>
+    </c:if>
+    <c:if test="${create != 'create'}">
+        <h2><spring:message code="meal.editMeal"/></h2>
+    </c:if>
+
+    <h2>${create == 'create' ? '<spring:message code="meal.createMeal"/>' : '<spring:message code="meal.editMeal"/>'}</h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action="${pageContext.request.contextPath}/meals">
         <input type="hidden" name="id" value="${meal.id}">

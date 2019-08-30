@@ -58,12 +58,9 @@ public class JdbcUserRepository implements UserRepository {
             user.setId(newKey.intValue());
             insertRoles(newKey.intValue(), roles);
             return user;
-
         } else if (!updateUser(parameterSource, user.getId(), roles)) {
             return null;
         }
-        deleteRoles(user.getId());
-               insertRoles(user.getId(), roles);
         return user;
     }
 
@@ -72,16 +69,18 @@ public class JdbcUserRepository implements UserRepository {
         int count = namedParameterJdbcTemplate.update(
                 "UPDATE users SET name=:name, email=:email, password=:password, " +
                         "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource);
-        return count + deleteRoles(id) + insertRoles(id, roles) > 0;
+        deleteRoles(id);
+        insertRoles(id, roles);
+        return count > 0;
     }
 
     @Transactional
-    public int deleteRoles(int id) {
-        return jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", id);
+    public boolean deleteRoles(int id) {
+        return jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", id) != 0;
     }
 
     @Transactional
-    public int insertRoles(int id, List<Role> roles) {
+    public boolean insertRoles(int id, List<Role> roles) {
         int[] count = jdbcTemplate.batchUpdate(
                 "insert into user_roles (user_id, role) values(?,?)",
                 new BatchPreparedStatementSetter() {
@@ -95,7 +94,7 @@ public class JdbcUserRepository implements UserRepository {
                     }
                 }
         );
-        return IntStream.of(count).sum();
+        return IntStream.of(count).sum() != 0;
     }
 
     @Transactional

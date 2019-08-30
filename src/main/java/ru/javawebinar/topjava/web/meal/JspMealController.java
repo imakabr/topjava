@@ -1,4 +1,4 @@
-package ru.javawebinar.topjava.web;
+package ru.javawebinar.topjava.web.meal;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Objects;
+import java.util.*;
 
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalDate;
 import static ru.javawebinar.topjava.util.DateTimeUtil.parseLocalTime;
@@ -44,34 +44,31 @@ public class JspMealController extends AbstractMealController {
         return "mealForm";
     }
 
-    @GetMapping("/create")
-    public String create(Model model) {
+    @GetMapping("/{create}")
+    public String create(@PathVariable String create, Model model) {
         final Meal meal = new Meal(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES), "", 1000);
         model.addAttribute("meal", meal);
         return "mealForm";
     }
 
     @GetMapping()
-    public String meals(HttpServletRequest request, Model model) {
-        String action = request.getParameter("action");
+    public String getAll(Model model) {
+        model.addAttribute("meals", getAll());
+        return "meals";
+    }
 
-        switch (action == null ? "all" : action) {
-            case "filter":
-                LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
-                LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
-                LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
-                LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
-                model.addAttribute("meals", getBetween(startDate, startTime, endDate, endTime));
-                return "meals";
-            case "all":
-            default:
-                model.addAttribute("meals", getAll());
-        }
-            return "meals";
+    @GetMapping("/filter")
+    public String filter(HttpServletRequest request, Model model) {
+        LocalDate startDate = parseLocalDate(request.getParameter("startDate"));
+        LocalDate endDate = parseLocalDate(request.getParameter("endDate"));
+        LocalTime startTime = parseLocalTime(request.getParameter("startTime"));
+        LocalTime endTime = parseLocalTime(request.getParameter("endTime"));
+        model.addAttribute("meals", getBetween(startDate, startTime, endDate, endTime));
+        return "meals";
     }
 
     @PostMapping()
-    public String setMeal(HttpServletRequest request) throws IOException {
+    public String save(HttpServletRequest request) throws IOException {
         request.setCharacterEncoding("UTF-8");
         Meal meal = new Meal(
                 LocalDateTime.parse(request.getParameter("dateTime")),
@@ -86,8 +83,8 @@ public class JspMealController extends AbstractMealController {
         return "redirect:meals";
     }
 
-        private int getId(HttpServletRequest request) {
-            String paramId = Objects.requireNonNull(request.getParameter("id"));
-            return Integer.parseInt(paramId);
-        }
+    private int getId(HttpServletRequest request) {
+        String paramId = Objects.requireNonNull(request.getParameter("id"));
+        return Integer.parseInt(paramId);
+    }
 }

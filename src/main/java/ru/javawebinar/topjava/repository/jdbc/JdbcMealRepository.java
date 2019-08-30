@@ -9,13 +9,14 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import ru.javawebinar.topjava.model.Meal;
 import ru.javawebinar.topjava.repository.MealRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Transactional(readOnly = true)
 @Repository
 public class JdbcMealRepository implements MealRepository {
 
@@ -27,19 +28,17 @@ public class JdbcMealRepository implements MealRepository {
 
     private final SimpleJdbcInsert insertMeal;
 
-    private final TransactionTemplate transactionTemplate;
-
     @Autowired
-    public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, TransactionTemplate transactionTemplate) {
+    public JdbcMealRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.insertMeal = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("meals")
                 .usingGeneratedKeyColumns("id");
 
         this.jdbcTemplate = jdbcTemplate;
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
-        this.transactionTemplate = transactionTemplate;
     }
 
+    @Transactional
     @Override
     public Meal save(Meal meal, int userId) {
         MapSqlParameterSource map = new MapSqlParameterSource()
@@ -49,24 +48,25 @@ public class JdbcMealRepository implements MealRepository {
                 .addValue("date_time", meal.getDateTime())
                 .addValue("user_id", userId);
         if (meal.isNew()) {
-            Number newId = transactionTemplate.execute(ts -> insertMeal.executeAndReturnKey(map));
+            Number newId = insertMeal.executeAndReturnKey(map);
             //Number newId = insertMeal.executeAndReturnKey(map);
             meal.setId(newId.intValue());
         } else {
-            if (transactionTemplate.execute(ts -> namedParameterJdbcTemplate.update("" +
+            if (namedParameterJdbcTemplate.update("" +
                             "UPDATE meals " +
                             "   SET description=:description, calories=:calories, date_time=:date_time " +
                             " WHERE id=:id AND user_id=:user_id"
-                    , map)) == 0) {
+                    , map) == 0) {
                 return null;
             }
         }
         return meal;
     }
 
+    @Transactional
     @Override
     public boolean delete(int id, int userId) {
-        return transactionTemplate.execute(ts -> jdbcTemplate.update("DELETE FROM meals WHERE id=? AND user_id=?", id, userId)) != 0;
+        return jdbcTemplate.update("DELETE FROM meals WHERE id=? AND user_id=?", id, userId) != 0;
     }
 
     @Override
