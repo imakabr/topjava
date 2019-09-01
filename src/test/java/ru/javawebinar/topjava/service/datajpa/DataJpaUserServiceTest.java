@@ -10,6 +10,8 @@ import ru.javawebinar.topjava.repository.JpaUtil;
 import ru.javawebinar.topjava.service.AbstractUserServiceTest;
 import ru.javawebinar.topjava.util.exception.NotFoundException;
 
+import java.util.List;
+
 import static ru.javawebinar.topjava.Profiles.DATAJPA;
 import static ru.javawebinar.topjava.UserTestData.*;
 
@@ -27,9 +29,9 @@ public class DataJpaUserServiceTest extends AbstractUserServiceTest {
 
     @Test
     public void testGetWithMeals() throws Exception {
-        User user = service.getWithMeals(USER_ID);
-        assertMatch(user, USER);
-        MealTestData.assertMatch(user.getMeals(), MealTestData.MEALS);
+        User user = service.getWithMeals(ADMIN_ID);
+        assertMatch(user, ADMIN);
+        MealTestData.assertMatch(user.getMeals(), List.of(MealTestData.ADMIN_MEAL2, MealTestData.ADMIN_MEAL1));
     }
 
     @Test(expected = NotFoundException.class)
