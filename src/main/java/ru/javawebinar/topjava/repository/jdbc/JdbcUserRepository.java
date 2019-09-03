@@ -58,20 +58,14 @@ public class JdbcUserRepository implements UserRepository {
             user.setId(newKey.intValue());
             insertRoles(newKey.intValue(), roles);
             return user;
-        } else if (!updateUser(parameterSource, user.getId(), roles)) {
+        } else if (namedParameterJdbcTemplate.update(
+                "UPDATE users SET name=:name, email=:email, password=:password, " +
+                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource) == 0) {
             return null;
         }
+        deleteRoles(user.getId());
+        insertRoles(user.getId(), roles);
         return user;
-    }
-
-    @Transactional
-    public boolean updateUser(BeanPropertySqlParameterSource parameterSource, int id, List<Role> roles) {
-        int count = namedParameterJdbcTemplate.update(
-                "UPDATE users SET name=:name, email=:email, password=:password, " +
-                        "registered=:registered, enabled=:enabled, calories_per_day=:caloriesPerDay WHERE id=:id", parameterSource);
-        deleteRoles(id);
-        insertRoles(id, roles);
-        return count > 0;
     }
 
     @Transactional
@@ -81,8 +75,7 @@ public class JdbcUserRepository implements UserRepository {
 
     @Transactional
     public void insertRoles(int id, List<Role> roles) {
-        int[] count = jdbcTemplate.batchUpdate(
-                "insert into user_roles (user_id, role) values(?,?)",
+        jdbcTemplate.batchUpdate("insert into user_roles (user_id, role) values(?,?)",
                 new BatchPreparedStatementSetter() {
                     public void setValues(PreparedStatement ps, int i) throws SQLException {
                         ps.setInt(1, id);
