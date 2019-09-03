@@ -18,7 +18,6 @@
         <h2><spring:message code="meal.editMeal"/></h2>
     </c:if>
 
-    <h2>${create == 'create' ? '<spring:message code="meal.createMeal"/>' : '<spring:message code="meal.editMeal"/>'}</h2>
     <jsp:useBean id="meal" type="ru.javawebinar.topjava.model.Meal" scope="request"/>
     <form method="post" action="${pageContext.request.contextPath}/meals">
         <input type="hidden" name="id" value="${meal.id}">

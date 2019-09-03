@@ -1,6 +1,7 @@
 package ru.javawebinar.topjava.service;
 
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.rules.ExpectedException;
@@ -17,7 +18,10 @@ import org.springframework.test.context.junit4.SpringRunner;
 import ru.javawebinar.topjava.ActiveDbProfileResolver;
 import ru.javawebinar.topjava.TimingRules;
 
+import java.util.List;
+
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static ru.javawebinar.topjava.Profiles.JDBC;
 import static ru.javawebinar.topjava.util.ValidationUtil.getRootCause;
 
 @ContextConfiguration({
@@ -49,5 +53,9 @@ abstract public class AbstractServiceTest {
         } catch (Exception e) {
             Assert.assertThat(getRootCause(e), instanceOf(exceptionClass));
         }
+    }
+
+    public void checkProfile(String profile) {
+        Assume.assumeTrue(!List.of(environment.getActiveProfiles()).contains(profile));
     }
 }

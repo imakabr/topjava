@@ -75,12 +75,12 @@ public class JdbcUserRepository implements UserRepository {
     }
 
     @Transactional
-    public boolean deleteRoles(int id) {
-        return jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", id) != 0;
+    public void deleteRoles(int id) {
+        jdbcTemplate.update("DELETE FROM user_roles WHERE user_id=?", id);
     }
 
     @Transactional
-    public boolean insertRoles(int id, List<Role> roles) {
+    public void insertRoles(int id, List<Role> roles) {
         int[] count = jdbcTemplate.batchUpdate(
                 "insert into user_roles (user_id, role) values(?,?)",
                 new BatchPreparedStatementSetter() {
@@ -94,7 +94,6 @@ public class JdbcUserRepository implements UserRepository {
                     }
                 }
         );
-        return IntStream.of(count).sum() != 0;
     }
 
     @Transactional

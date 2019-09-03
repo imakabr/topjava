@@ -14,9 +14,8 @@ public class JpaUserServiceTest extends AbstractUserServiceTest {
     @Autowired
     private JpaUtil jpaUtil;
 
-    @Before
-    public void setUp() throws Exception {
-        cacheManager.getCache("users").clear();
+    @Override
+    public void someThingElse() {
         jpaUtil.clear2ndLevelHibernateCache();
     }
 }
