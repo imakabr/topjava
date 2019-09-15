@@ -93,12 +93,12 @@ class MealRestControllerTest extends AbstractControllerTest {
         mockMvc.perform(
                 get(REST_URL + "/filter")
                         .param("startDate", "2015-05-30")
-                        .param("startTime", "10:23")
-                        .param("endDate", "2015-05-30")
-                        .param("endTime", "14:23"))
+//                        .param("startTime", "")
+                        .param("endDate", "2015-05-30"))
+//                        .param("endTime", ""))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
-                .andExpect(MealToTestData.contentJson(MEAL2));
+                .andExpect(MealToTestData.contentJson(MEAL3, MEAL2, MEAL1));
     }
 }

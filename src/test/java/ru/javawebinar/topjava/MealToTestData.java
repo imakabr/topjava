@@ -14,7 +14,7 @@ import static ru.javawebinar.topjava.TestUtil.readListFromJsonMvcResult;
 public class MealToTestData {
 
     public static void assertMatch(Iterable<MealTo> actual, Iterable<MealTo> expected) {
-        assertThat(actual).usingElementComparatorIgnoringFields("user").isEqualTo(expected);
+        assertThat(actual).usingFieldByFieldElementComparator().isEqualTo(expected);
     }
 
     public static ResultMatcher contentJson(Meal... expected) {
