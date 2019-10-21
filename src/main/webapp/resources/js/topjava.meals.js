@@ -34,3 +34,15 @@ $(function () {
         }
     );
 });
+
+function filter() {
+    $.ajax({
+        type: "POST",
+        url: context.ajaxUrl + "filter",
+        data: $('#filterForm').serialize(),
+    }).done(function () {
+        // $("#editRow").modal("hide");
+        //updateTable();
+        successNoty("Saved");
+    });
+}
