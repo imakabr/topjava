@@ -60,8 +60,8 @@
                     </td>
                     <td>${meal.description}</td>
                     <td>${meal.calories}</td>
-                    <td><a href="meals/update?id=${meal.id}"><spring:message code="common.update"/></a></td>
-                    <td><a href="meals/delete?id=${meal.id}"><spring:message code="common.delete"/></a></td>
+                    <td><a><span class="fa fa-pencil"></span></a></td>
+                    <td><a class="delete" id="${meal.id}"><span class="fa fa-remove"></span></a></td>
                 </tr>
             </c:forEach>
         </table>
@@ -72,7 +72,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title"><spring:message code="user.add"/></h4>
+                <h4 class="modal-title"><spring:message code="meal.add"/></h4>
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div class="modal-body">
@@ -80,21 +80,18 @@
                     <input type="hidden" id="id" name="id">
 
                     <div class="form-group">
-                        <label for="name" class="col-form-label"><spring:message code="user.name"/></label>
-                        <input type="text" class="form-control" id="name" name="name"
-                               placeholder="<spring:message code="user.name"/>">
+                        <label for="name" class="col-form-label"><spring:message code="meal.dateTime"/></label>
+                        <input type="datetime-local" class="form-control" id="name" name="dateTime" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="email" class="col-form-label"><spring:message code="user.email"/></label>
-                        <input type="email" class="form-control" id="email" name="email"
-                               placeholder="<spring:message code="user.email"/>">
+                        <label for="description" class="col-form-label"><spring:message code="meal.description"/></label>
+                        <input type="text" class="form-control" id="description" name="description" required>
                     </div>
 
                     <div class="form-group">
-                        <label for="password" class="col-form-label"><spring:message code="user.password"/></label>
-                        <input type="password" class="form-control" id="password" name="password"
-                               placeholder="<spring:message code="user.password"/>">
+                        <label for="calories" class="col-form-label"><spring:message code="meal.calories"/></label>
+                        <input type="number" class="form-control" id="calories" name="calories" required>
                     </div>
                 </form>
             </div>
