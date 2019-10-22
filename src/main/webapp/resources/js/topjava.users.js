@@ -40,3 +40,9 @@ $(function () {
         }
     );
 });
+
+function checkbox () {
+    if (confirm('Are you sure?')) {
+        //deleteRow($(this).attr("id"));
+    }
+};
