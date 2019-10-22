@@ -25,6 +25,12 @@ public class AdminUIController extends AbstractUserController {
         super.delete(id);
     }
 
+    @PostMapping(value = "/{id}")
+    @ResponseStatus(value = HttpStatus.NO_CONTENT)
+    public void updateActivity(@PathVariable int id, @RequestParam boolean isEnabled) {
+        service.updateActivity(id, isEnabled);
+    }
+
     @PostMapping
     @ResponseStatus(value = HttpStatus.NO_CONTENT)
     public void createOrUpdate(@RequestParam("id") Integer id,

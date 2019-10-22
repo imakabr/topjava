@@ -41,8 +41,16 @@ $(function () {
     );
 });
 
-function checkbox () {
-    if (confirm('Are you sure?')) {
-        //deleteRow($(this).attr("id"));
-    }
+function checkbox(id, isEnabled) {
+    // if (confirm('Are you sure?')) {
+    // }
+    $.ajax({
+        url: context.ajaxUrl + id,
+        type: 'post',
+        data: {isEnabled : !isEnabled},
+    }).done(function () {
+        updateTable();
+        successNoty("Updated");
+    });
+
 };

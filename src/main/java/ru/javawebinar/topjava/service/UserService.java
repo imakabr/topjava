@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 import ru.javawebinar.topjava.model.User;
 import ru.javawebinar.topjava.repository.UserRepository;
@@ -38,12 +39,17 @@ public class UserService {
         return checkNotFoundWithId(repository.get(id), id);
     }
 
+    @Transactional
+    public void updateActivity(int id, boolean isEnabled) {
+        get(id).setEnabled(isEnabled);
+    }
+
     public User getByEmail(String email) {
         Assert.notNull(email, "email must not be null");
         return checkNotFound(repository.getByEmail(email), "email=" + email);
     }
 
-    @Cacheable("users")
+    //@Cacheable("users")
     public List<User> getAll() {
         return repository.getAll();
     }

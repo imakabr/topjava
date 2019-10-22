@@ -35,18 +35,6 @@ $(function () {
     );
 });
 
-// function filter() {
-//     $.ajax({
-//         type: "POST",
-//         url: context.ajaxUrl + "filter",
-//         data: $('#filterForm').serialize(),
-//     }).done(function () {
-//         // $("#editRow").modal("hide");
-//         updateTable();
-//         successNoty("Saved");
-//     });
-// }
-
 function filter() {
     $.get( { url : context.ajaxUrl + "filter",
             data: $('#filterForm').serialize(),
@@ -54,10 +42,3 @@ function filter() {
             context.datatableApi.clear().rows.add(data).draw();
         }});
 }
-
-
-// function updateTable() {
-//     $.get(context.ajaxUrl, function (data) {
-//         context.datatableApi.clear().rows.add(data).draw();
-//     });
-// }

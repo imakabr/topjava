@@ -13,7 +13,7 @@
     <div class="container">
         <h3 class="text-center"><spring:message code="meal.title"/></h3>
 
-        <form id="filterForm"<%-- method="get" action="meals/filter"--%>>
+        <form id="filterForm">
             <dl>
                 <dt><spring:message code="meal.startDate"/>:</dt>
                 <dd><input type="date" name="startDate" value="${param.startDate}"></dd>
@@ -41,6 +41,7 @@
             <span class="fa fa-plus"></span>
             <spring:message code="meal.add"/>
         </button>
+
         <table class="table table-striped" id="datatable">
             <thead>
             <tr>
