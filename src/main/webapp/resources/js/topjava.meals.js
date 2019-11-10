@@ -1,3 +1,7 @@
+
+
+
+
 function updateFilteredTable() {
     $.ajax({
         type: "GET",
@@ -15,11 +19,21 @@ $(function () {
     makeEditable({
         ajaxUrl: "ajax/profile/meals/",
         datatableApi: $("#datatable").DataTable({
+            "ajax": {
+                "url": "ajax/profile/meals/",
+                "dataSrc": ""
+            },
             "paging": false,
             "info": true,
             "columns": [
                 {
-                    "data": "dateTime"
+                    "data": "dateTime",
+                    render: function(data, type, row){
+                        if(type === "sort" || type === "type"){
+                            return data;
+                        }
+                        return moment(data).format("MM-DD-YYYY HH:mm");
+                    }
                 },
                 {
                     "data": "description"
@@ -28,12 +42,14 @@ $(function () {
                     "data": "calories"
                 },
                 {
-                    "defaultContent": "Edit",
-                    "orderable": false
+                    "defaultContent": "",
+                    "orderable": false,
+                    "render": renderEditBtn
                 },
                 {
-                    "defaultContent": "Delete",
-                    "orderable": false
+                    "defaultContent": "",
+                    "orderable": false,
+                    "render": renderDeleteBtn
                 }
             ],
             "order": [
