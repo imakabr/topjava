@@ -40,6 +40,7 @@ public class UserService {
     }
 
     @Transactional
+    @CacheEvict(value = "users", allEntries = true)
     public void updateActivity(int id, boolean isEnabled) {
         get(id).setEnabled(isEnabled);
     }
@@ -49,7 +50,7 @@ public class UserService {
         return checkNotFound(repository.getByEmail(email), "email=" + email);
     }
 
-    //@Cacheable("users")
+    @Cacheable("users")
     public List<User> getAll() {
         return repository.getAll();
     }
