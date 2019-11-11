@@ -30,7 +30,7 @@ $(function () {
                         "desc"
                     ]
                 ]
-            })
+            }), updateTable: filter
         }
     );
 });
@@ -38,7 +38,10 @@ $(function () {
 function filter() {
     $.get( { url : context.ajaxUrl + "filter",
             data: $('#filterForm').serialize(),
-        success : function (data) {
-            context.datatableApi.clear().rows.add(data).draw();
-        }});
+        success : updateTableByData});
+}
+
+function clearFilter() {
+    $("#filterForm")[0].reset();
+    $.get("ajax/meals/", updateTableByData);
 }

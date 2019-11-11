@@ -33,7 +33,7 @@
             <button type="button" class="btn badge-info" onclick="filter()">
                 <spring:message code="meal.filter"/></button>
 
-            <button type="reset" class="btn badge-warning" onclick="filter()" >
+            <button type="button" class="btn badge-warning" onclick="clearFilter()" >
                 <spring:message code="meal.reset"/></button>
         </form>
 
