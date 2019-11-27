@@ -1,0 +1,139 @@
+{
+	"info": {
+		"_postman_id": "a019624b-852b-4f7b-87d6-e386866580f6",
+		"name": "topjava",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "http://localhost:8080/topjava/rest/profile/",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "12345asdf",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "loh@loh.ru",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/profile/",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"profile",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/topjava/rest/profile/register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Loh\",\n    \"email\": \"loh@loh.ru\",\n    \"password\": \"12345asdf\",\n    \"caloriesPerDay\": 666\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/profile/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"profile",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "http://localhost:8080/topjava/rest/admin/users/100010",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "password",
+							"value": "admin",
+							"type": "string"
+						},
+						{
+							"key": "username",
+							"value": "admin@gmail.com",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"name": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"id\": 100010,\n    \"name\": \"Loh\",\n    \"email\": \"loh@loh.ru\",\n\t\"password\": \"12345asdfff\",\n    \"enabled\": true,\n    \"registered\": \"2019-11-27T18:26:40.812+0000\",\n    \"roles\": [\n        \"ROLE_ADMIN\"\n    ],\n    \"caloriesPerDay\": 333\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/topjava/rest/admin/users/100010",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"topjava",
+						"rest",
+						"admin",
+						"users",
+						"100010"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
